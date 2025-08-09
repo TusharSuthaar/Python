@@ -2,6 +2,19 @@
 
 This repository contains 12 separate Python automation programs extracted from the main Streamlit app. Each program can be run independently to perform specific automation tasks.
 
+## ✅ Prefer the Streamlit Dashboard
+
+You can run all of these programs inline from the dashboard with inputs and outputs rendered in the browser.
+
+- Start the dashboard:
+  ```powershell
+  .\automation_env\Scripts\Activate.ps1; streamlit run automation_app.py
+  ```
+- Use the top navigation to choose a Category and Program
+- Read usage, fill inputs, and see results inline
+
+Or, run any script directly as described below.
+
 ## 📋 Programs List
 
 1. **`1_ram_monitor.py`** - Monitor system RAM usage
