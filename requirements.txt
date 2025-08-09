@@ -1,0 +1,19 @@
+# Core automation libraries
+psutil>=5.9.0
+pywhatkit>=5.4
+requests>=2.28.0
+beautifulsoup4>=4.11.0
+Pillow>=9.0.0
+
+# Email and communication
+sendgrid>=6.9.0
+twilio>=8.2.0
+
+# Social media
+tweepy>=4.14.0
+
+# Search functionality
+googlesearch-python>=1.2.3
+
+# Web scraping
+lxml>=4.9.0 

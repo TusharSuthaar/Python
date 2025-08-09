@@ -1,169 +1,159 @@
+#!/usr/bin/env python3
+"""
+Python Automation Toolkit Launcher
+Runs individual automation programs
+"""
+
 import streamlit as st
-import psutil
-import pywhatkit
-import smtplib
-import webbrowser
-from twilio.rest import Client
-from googlesearch import search
-import requests
-from bs4 import BeautifulSoup
-from PIL import Image, ImageDraw
-import sendgrid
-from sendgrid.helpers.mail import Mail
+import subprocess
+import sys
+import os
 
 # --------------------------------------
 # Streamlit App Title
 # --------------------------------------
 st.title("📌 Python Automation Toolkit")
-st.write("Perform multiple automation tasks from one place!")
+st.write("Choose a task to run the corresponding automation program!")
+
+# Check if all program files exist
+program_files = {
+    "Read RAM": "1_ram_monitor.py",
+    "Send WhatsApp Message": "2_whatsapp_sender.py", 
+    "Send Email": "3_email_sender.py",
+    "Send WhatsApp Without Saving Contact": "4_whatsapp_web_opener.py",
+    "Send SMS": "5_sms_sender.py",
+    "Make a Phone Call": "6_phone_caller.py",
+    "Google Search": "7_google_search.py",
+    "Post on Twitter (X)": "8_twitter_poster.py",
+    "Download Website Data": "9_website_downloader.py",
+    "Send Anonymous Email": "10_anonymous_email.py",
+    "Tuple vs List Difference": "11_tuple_vs_list.py",
+    "Create Digital Image": "12_image_creator.py",
+}
 
 # --------------------------------------
 # Menu
 # --------------------------------------
-task = st.selectbox("Choose a task", [
-    "Read RAM",
-    "Send WhatsApp Message",
-    "Send Email",
-    "Send WhatsApp Without Saving Contact",
-    "Send SMS",
-    "Make a Phone Call",
-    "Google Search",
-    "Post on Twitter (X)",
-    "Download Website Data",
-    "Send Anonymous Email",
-    "Tuple vs List Difference",
-    "Create Digital Image",
-])
+task = st.selectbox("Choose a task", list(program_files.keys()))
 
 # --------------------------------------
-# Task Implementations
+# Program Launcher
 # --------------------------------------
 
-# 1. Read RAM
-if task == "Read RAM":
-    mem = psutil.virtual_memory()
-    st.write(f"**Total:** {mem.total / (1024**3):.2f} GB")
-    st.write(f"**Available:** {mem.available / (1024**3):.2f} GB")
-    st.write(f"**Used:** {mem.used / (1024**3):.2f} GB")
-    st.write(f"**Percentage:** {mem.percent}%")
+if st.button(f"Run {task}", type="primary"):
+    program_file = program_files[task]
+    
+    if not os.path.exists(program_file):
+        st.error(f"❌ Program file '{program_file}' not found!")
+        st.write("Make sure all program files are in the same directory.")
+    else:
+        st.info(f"🚀 Launching {program_file}...")
+        st.write("**Note:** The program will run in your terminal/command prompt.")
+        st.write("Check your terminal window to interact with the program.")
+        
+        try:
+            # Run the program in a new terminal/command prompt
+            if sys.platform.startswith('win'):
+                # Windows
+                subprocess.Popen(['cmd', '/c', 'start', 'cmd', '/k', f'python {program_file}'])
+            elif sys.platform.startswith('darwin'):
+                # macOS
+                subprocess.Popen(['osascript', '-e', f'tell app "Terminal" to do script "python {program_file}"'])
+            else:
+                # Linux
+                subprocess.Popen(['gnome-terminal', '--', 'python3', program_file])
+            
+            st.success(f"✅ {task} program launched successfully!")
+            st.write("The program is now running in a separate terminal window.")
+            
+        except Exception as e:
+            st.error(f"❌ Error launching program: {e}")
+            st.write("**Fallback:** You can run the program manually:")
+            st.code(f"python {program_file}", language="bash")
 
-# 2. Send WhatsApp Message
-elif task == "Send WhatsApp Message":
-    number = st.text_input("Enter Phone Number (+91...)")
-    message = st.text_area("Enter Message")
-    hour = st.number_input("Hour (24hr format)", 0, 23, 12)
-    minute = st.number_input("Minute", 0, 59, 0)
-    if st.button("Send Message"):
-        pywhatkit.sendwhatmsg(number, message, hour, minute)
-        st.success("Message Scheduled!")
+# --------------------------------------
+# Information Section
+# --------------------------------------
 
-# 3. Send Email
-elif task == "Send Email":
-    sender = st.text_input("Sender Email")
-    password = st.text_input("Sender App Password", type="password")
-    receiver = st.text_input("Receiver Email")
-    subject = st.text_input("Subject")
-    body = st.text_area("Body")
-    if st.button("Send Email"):
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
-            server.starttls()
-            server.login(sender, password)
-            server.sendmail(sender, receiver, f"Subject: {subject}\n\n{body}")
-        st.success("Email Sent!")
+st.markdown("---")
+st.subheader("📋 Available Programs")
 
-# 4. Send WhatsApp Without Saving Contact
-elif task == "Send WhatsApp Without Saving Contact":
-    phone_number = st.text_input("Enter Phone Number (+91...)")
-    message = st.text_area("Enter Message")
-    if st.button("Open WhatsApp Web"):
-        webbrowser.open(f"https://wa.me/{phone_number}?text={message}")
-        st.success("WhatsApp Web Opened!")
+col1, col2 = st.columns(2)
 
-# 5. Send SMS
-elif task == "Send SMS":
-    sid = st.text_input("Twilio SID")
-    token = st.text_input("Twilio Auth Token", type="password")
-    from_num = st.text_input("Twilio Number")
-    to_num = st.text_input("Receiver Number")
-    sms_body = st.text_area("Message")
-    if st.button("Send SMS"):
-        client = Client(sid, token)
-        message = client.messages.create(body=sms_body, from_=from_num, to=to_num)
-        st.success(f"SMS Sent! SID: {message.sid}")
+with col1:
+    st.write("**System & Communication:**")
+    st.write("• RAM Monitor")
+    st.write("• Email Sender") 
+    st.write("• SMS Sender")
+    st.write("• Phone Caller")
+    st.write("• Anonymous Email")
+    
+with col2:
+    st.write("**Web & Social:**")
+    st.write("• WhatsApp Sender")
+    st.write("• WhatsApp Web Opener")
+    st.write("• Google Search")
+    st.write("• Twitter Poster")
+    st.write("• Website Downloader")
 
-# 6. Make a Phone Call
-elif task == "Make a Phone Call":
-    sid = st.text_input("Twilio SID")
-    token = st.text_input("Twilio Auth Token", type="password")
-    from_num = st.text_input("Twilio Number")
-    to_num = st.text_input("Receiver Number")
-    if st.button("Call Now"):
-        client = Client(sid, token)
-        call = client.calls.create(
-            twiml="<Response><Say>Hello from Python!</Say></Response>",
-            from_=from_num,
-            to=to_num
-        )
-        st.success(f"Call Initiated! SID: {call.sid}")
+st.write("**Utilities:**")
+st.write("• Tuple vs List Comparison")
+st.write("• Digital Image Creator")
 
-# 7. Google Search
-elif task == "Google Search":
-    query = st.text_input("Enter Search Query")
-    if st.button("Search"):
-        results = list(search(query, num_results=5))
-        for r in results:
-            st.write(r)
+# --------------------------------------
+# Setup Information
+# --------------------------------------
 
-# 8. Post on Twitter (X)
-elif task == "Post on Twitter (X)":
-    import tweepy
-    api_key = st.text_input("API Key")
-    api_secret = st.text_input("API Secret")
-    access_token = st.text_input("Access Token")
-    access_secret = st.text_input("Access Secret")
-    tweet = st.text_area("Tweet Text")
-    if st.button("Post Tweet"):
-        auth = tweepy.OAuth1UserHandler(api_key, api_secret, access_token, access_secret)
-        api = tweepy.API(auth)
-        api.update_status(tweet)
-        st.success("Tweet Posted!")
+st.markdown("---")
+st.subheader("🔧 Setup Requirements")
 
-# 9. Download Website Data
-elif task == "Download Website Data":
-    url = st.text_input("Enter Website URL")
-    if st.button("Download"):
-        r = requests.get(url)
-        soup = BeautifulSoup(r.text, "html.parser")
-        st.code(soup.prettify()[:3000])  # Limit display
+with st.expander("View Setup Instructions"):
+    st.write("**Dependencies Installation:**")
+    st.code("pip install -r requirements.txt", language="bash")
+    
+    st.write("**API Keys Needed for Some Programs:**")
+    st.write("• **Gmail**: App Password (for email sender)")
+    st.write("• **Twilio**: Account SID + Auth Token (for SMS/calls)")
+    st.write("• **Twitter**: API Keys (for posting)")
+    st.write("• **SendGrid**: API Key (for anonymous email)")
+    
+    st.write("**Manual Program Execution:**")
+    st.write("You can also run any program directly from terminal:")
+    st.code("python 1_ram_monitor.py", language="bash")
 
-# 10. Send Anonymous Email
-elif task == "Send Anonymous Email":
-    api_key = st.text_input("SendGrid API Key")
-    from_email = st.text_input("From Email")
-    to_email = st.text_input("To Email")
-    subject = st.text_input("Subject")
-    body = st.text_area("Body")
-    if st.button("Send Anon Email"):
-        sg = sendgrid.SendGridAPIClient(api_key)
-        email = Mail(from_email=from_email, to_emails=to_email, subject=subject, plain_text_content=body)
-        sg.send(email)
-        st.success("Anonymous Email Sent!")
+# --------------------------------------
+# File Status Check
+# --------------------------------------
 
-# 11. Tuple vs List Difference
-elif task == "Tuple vs List Difference":
-    st.table({
-        "Feature": ["Mutability", "Syntax", "Performance", "Use Case", "Memory Usage"],
-        "Tuple": ["Immutable", "()", "Faster", "Fixed Data", "Less"],
-        "List": ["Mutable", "[]", "Slower", "Dynamic Data", "More"]
-    })
+st.markdown("---")
+st.subheader("📁 Program Files Status")
 
-# 12. Create Digital Image
-elif task == "Create Digital Image":
-    width = st.number_input("Width", 100, 1000, 200)
-    height = st.number_input("Height", 100, 1000, 200)
-    color = st.color_picker("Choose Color", "#FFFFFF")
-    if st.button("Create Image"):
-        img = Image.new("RGB", (width, height), color)
-        img.save("my_image.png")
-        st.image(img)
-        st.success("Image Created!")
+missing_files = []
+existing_files = []
+
+for task_name, filename in program_files.items():
+    if os.path.exists(filename):
+        existing_files.append(filename)
+    else:
+        missing_files.append(filename)
+
+if existing_files:
+    st.success(f"✅ {len(existing_files)} program files found")
+    with st.expander("View existing files"):
+        for file in existing_files:
+            st.write(f"• {file}")
+
+if missing_files:
+    st.error(f"❌ {len(missing_files)} program files missing")
+    with st.expander("View missing files"):
+        for file in missing_files:
+            st.write(f"• {file}")
+        st.write("**Note:** Make sure all program files are in the same directory as this launcher.")
+
+# --------------------------------------
+# Footer
+# --------------------------------------
+
+st.markdown("---")
+st.write("**Note:** This launcher opens programs in separate terminal windows for better interaction.")
+st.write("For detailed documentation, check `PROGRAMS_README.md`")
